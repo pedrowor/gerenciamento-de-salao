@@ -1,1 +1,1 @@
-Project status: Testing
+Project status: Stable and Testing
