@@ -44,3 +44,5 @@ Add secure password authentication, automated tests, collision checks for appoin
 
 ## Credits
 Forked from [jorgemdt/gerenciamento-de-salao](https://github.com/jorgemdt/gerenciamento-de-salao). Check the repository's license and commit history for attribution and contribution details.
+gerenciamento-de-salao:
+Educational appointment manager built with Python, Tkinter and SQLite using an MVC-style structure. (Fork)
