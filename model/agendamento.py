@@ -1,24 +1,6 @@
 from sqlite3 import Error
 from .database import connect_db
 
-def check_user(username):
-    """Verifica se um nome de usuário existe no banco de dados."""
-    conn = connect_db()
-    if conn is None:
-        return False
-
-    sql = "SELECT id FROM usuarios WHERE username = ?"
-    try:
-        cur = conn.cursor()
-        cur.execute(sql, (username,))
-        user_exists = cur.fetchone() is not None
-        conn.close()
-        return user_exists
-    except Error as e:
-        print(f"Erro ao verificar usuário: {e}")
-        conn.close()
-        return False
-
 class AgendamentoModel:
     """
     Classe Model para gerenciar as operações CRUD para agendamentos.
