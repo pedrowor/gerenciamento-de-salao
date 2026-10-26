@@ -41,17 +41,13 @@ def setup_database():
     );
     """
 
-    # SQL para criar a tabela de usuários (para login simples)
+    # Armazena somente hash de senha; usuários antigos terão NULL até migrarem.
     sql_create_usuarios_table = """
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT
     );
-    """
-
-    # SQL para inserir um usuário padrão (se não existir)
-    sql_insert_default_user = """
-    INSERT OR IGNORE INTO usuarios (username) VALUES ('neide');
     """
 
     # Cria a conexão com o banco
@@ -63,14 +59,16 @@ def setup_database():
         create_table(conn, sql_create_agendamentos_table)
         create_table(conn, sql_create_usuarios_table)
         
-        # Insere o usuário padrão
+        # Atualização não destrutiva de bancos criados com login por usuário.
         try:
-            c = conn.cursor()
-            c.execute(sql_insert_default_user)
+            existing_columns = {
+                row[1] for row in conn.execute("PRAGMA table_info(usuarios)")
+            }
+            if "password_hash" not in existing_columns:
+                conn.execute("ALTER TABLE usuarios ADD COLUMN password_hash TEXT")
             conn.commit()
-            print("Usuário padrão 'admin' garantido.")
         except Error as e:
-            print(f"Erro ao inserir usuário padrão: {e}")
+            print(f"Erro ao atualizar a tabela de usuários: {e}")
 
         # Fecha a conexão
         conn.close()
