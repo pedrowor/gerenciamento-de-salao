@@ -227,7 +227,8 @@ class MainView:
                 except (ValueError, TypeError, AttributeError):
                     pass 
 
-            display_row = (row[0], row[1], display_datetime_tree, row[6], f"{row[5]:.2f}") 
+            price_text = f"{row[5]:.2f}" if row[5] is not None else "-"
+            display_row = (row[0], row[1], display_datetime_tree, row[6], price_text) 
             self.tree.insert("", tk.END, values=display_row, iid=row[0])
 
     def get_form_data(self):

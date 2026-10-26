@@ -95,7 +95,7 @@ class AppController:
                 "Telefone": ag_data_tuple[2],
                 "Email": ag_data_tuple[3],
                 "Data": ag_data_tuple[4], # Formato YYYY-MM-DD HH:MM:SS do DB
-                "Valor": f"{ag_data_tuple[5]:.2f}", 
+                "Valor": f"{ag_data_tuple[5]:.2f}" if ag_data_tuple[5] is not None else "", 
                 "Serviço": ag_data_tuple[6],
             }
             self.main_view.set_form_data(data_dict)
