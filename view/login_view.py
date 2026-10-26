@@ -1,79 +1,110 @@
-# view/login_view.py
+"""Tela de login e cadastro local."""
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-class LoginView:
-    """
-    Janela de Login da aplicação.
-    """
-    def __init__(self, master, controller):
-        """
-        Inicializa a LoginView.
 
-        Args:
-            master: A janela raiz (Tk) da aplicação.
-            controller: O objeto AppController (ou um Mock) para comunicação.
-        """
+class LoginView:
+    def __init__(self, master, controller):
         self.master = master
         self.controller = controller
 
-        # Cria uma Toplevel window para o login
         self.window = tk.Toplevel(self.master)
         self.window.title("Login - Salão de Beleza Neide Leila")
-        self.window.geometry("300x150+500+300")      # Largura x Altura + Posição X + Posição Y
+        self.window.geometry("350x230")
         self.window.resizable(False, False)
 
-        # Frame principal
-        self.frame = ttk.Frame(self.window, padding="20")
-        self.frame.pack(expand=True, fill=tk.BOTH)
+        frame = ttk.Frame(self.window, padding=20)
+        frame.pack(expand=True, fill=tk.BOTH)
 
-        # Widgets
-        self.label_user = ttk.Label(self.frame, text="Nome de Usuário:")
-        self.username_entry = ttk.Entry(self.frame, width=30)
-        self.login_button = ttk.Button(self.frame, text="Entrar")
+        ttk.Label(frame, text="Usuário:").pack(anchor=tk.W)
+        self.username_entry = ttk.Entry(frame, width=36)
+        self.username_entry.pack(pady=(3, 9), fill=tk.X)
 
-        # Layout
-        self.label_user.pack(pady=5)
-        self.username_entry.pack(pady=5)
-        self.login_button.pack(pady=10)
+        ttk.Label(frame, text="Senha:").pack(anchor=tk.W)
+        self.password_entry = ttk.Entry(frame, width=36, show="*")
+        self.password_entry.pack(pady=(3, 12), fill=tk.X)
 
-        # Foca no campo de usuário ao abrir
+        self.login_button = ttk.Button(frame, text="Entrar")
+        self.login_button.pack(fill=tk.X)
+        self.register_button = ttk.Button(
+            frame, text="Criar conta", command=self._show_registration_dialog
+        )
+        self.register_button.pack(pady=(7, 0), fill=tk.X)
+
         self.username_entry.focus_set()
-
-        # Verifica se o controller não é None antes de configurar comandos
-        if self.controller:
-            self.username_entry.bind("<Return>", self.controller.handle_login_event)
-            self.login_button.config(command=self.controller.handle_login_event)
-            self.window.protocol("WM_DELETE_WINDOW", self.on_closing) # Só define se houver controller real
+        if controller:
+            self.username_entry.bind("<Return>", controller.handle_login_event)
+            self.password_entry.bind("<Return>", controller.handle_login_event)
+            self.login_button.config(command=controller.handle_login_event)
+            self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
         else:
-            # Comportamento padrão para teste (ou pode ser configurado no teste)
             self.window.protocol("WM_DELETE_WINDOW", self.destroy)
 
+    def _show_registration_dialog(self):
+        dialog = tk.Toplevel(self.window)
+        dialog.title("Criar conta")
+        dialog.geometry("360x285")
+        dialog.resizable(False, False)
+        dialog.transient(self.window)
+        dialog.grab_set()
+
+        frame = ttk.Frame(dialog, padding=20)
+        frame.pack(expand=True, fill=tk.BOTH)
+
+        ttk.Label(frame, text="Novo usuário:").pack(anchor=tk.W)
+        username = ttk.Entry(frame, width=36)
+        username.pack(fill=tk.X, pady=(3, 9))
+
+        ttk.Label(frame, text="Senha (mínimo 8 caracteres):").pack(anchor=tk.W)
+        password = ttk.Entry(frame, width=36, show="*")
+        password.pack(fill=tk.X, pady=(3, 9))
+
+        ttk.Label(frame, text="Confirme a senha:").pack(anchor=tk.W)
+        confirmation = ttk.Entry(frame, width=36, show="*")
+        confirmation.pack(fill=tk.X, pady=(3, 12))
+
+        def submit(event=None):
+            if not self.controller:
+                return
+            success, message = self.controller.handle_register_event(
+                username.get(), password.get(), confirmation.get()
+            )
+            if success:
+                self.username_entry.delete(0, tk.END)
+                self.username_entry.insert(0, username.get().strip())
+                self.password_entry.delete(0, tk.END)
+                dialog.destroy()
+                messagebox.showinfo("Conta criada", message, parent=self.window)
+                self.password_entry.focus_set()
+            else:
+                messagebox.showerror("Cadastro", message, parent=dialog)
+
+        ttk.Button(frame, text="Cadastrar", command=submit).pack(fill=tk.X)
+        dialog.bind("<Return>", submit)
+        username.focus_set()
 
     def get_username(self):
-        """Retorna o nome de usuário inserido."""
         return self.username_entry.get()
 
+    def get_password(self):
+        return self.password_entry.get()
+
     def show(self):
-        """Mostra a janela de login."""
         self.window.deiconify()
         self.window.grab_set()
 
     def hide(self):
-        """Esconde a janela de login."""
         self.window.withdraw()
 
     def destroy(self):
-        """Destroi a janela de login."""
-        # self.window.grab_release() # Cuidar ao chamar sem ter grab_set()
         self.window.destroy()
 
     def show_error(self, title, message):
-        """Exibe uma mensagem de erro."""
         messagebox.showerror(title, message, parent=self.window)
 
     def on_closing(self):
-        """Ação ao tentar fechar a janela de login (ex: fechar a aplicação)."""
-        if messagebox.askokcancel("Sair", "Deseja sair da aplicação?", parent=self.window):
+        if messagebox.askokcancel(
+            "Sair", "Deseja sair da aplicação?", parent=self.window
+        ):
             self.master.destroy()
