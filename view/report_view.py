@@ -78,7 +78,7 @@ class ReportView:
         for row in data:
             # Garante que o valor seja formatado corretamente
             formatted_row = list(row)
-            formatted_row[5] = f"{row[5]:.2f}"
+            formatted_row[5] = f"{row[5]:.2f}" if row[5] is not None else "-"
             self.tree.insert("", tk.END, values=tuple(formatted_row))
 
     def show(self):
