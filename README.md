@@ -1,2 +1,2 @@
-# gerenciamento-de-salao
-Sistema de Gerenciamento de Agendamento para Salão de Beleza usando a arquitetura MVC com Python, Tkinter e SQLite.
+gerenciamento-de-salao:
+Educational appointment manager built with Python, Tkinter and SQLite using an MVC-style structure. (Fork)
