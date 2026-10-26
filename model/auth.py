@@ -68,6 +68,8 @@ def register_user(username, password):
         return True
     except IntegrityError:
         return False
+    except Error as exc:
+        raise RuntimeError("Não foi possível salvar a conta.") from exc
     finally:
         connection.close()
 
