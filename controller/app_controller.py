@@ -1,7 +1,8 @@
 import tkinter as tk
 from datetime import datetime
 from model.database import setup_database
-from model.agendamento import AgendamentoModel, check_user
+from model.agendamento import AgendamentoModel
+from model.auth import authenticate_user, register_user
 from view.login_view import LoginView
 from view.main_view import MainView
 from view.report_view import ReportView
@@ -35,24 +36,37 @@ class AppController:
         # O mainloop será chamado em main.py
 
     def handle_login_event(self, event=None):
-        """
-        Lida com o evento de login (botão ou Enter).
-        Verifica o usuário e abre a tela principal se válido.
-        """
-        username = self.login_view.get_username()
-        if not username:
-            self.login_view.show_error("Login Inválido", "Por favor, digite um nome de usuário.")
+        """Verifica usuário e senha antes de abrir a tela principal."""
+        username = self.login_view.get_username().strip()
+        password = self.login_view.get_password()
+
+        if not username or not password:
+            self.login_view.show_error(
+                "Campos Obrigatórios", "Informe usuário e senha."
+            )
             return
 
-        print(f"Tentando login com: {username}")
-        if check_user(username):
-            print("Login bem-sucedido!")
-            self.login_view.destroy() # Fecha a janela de login
-            self.show_main_view()     # Mostra a janela principal
+        if authenticate_user(username, password):
+            self.login_view.destroy()
+            self.show_main_view()
         else:
-            print("Login falhou.")
-            self.login_view.show_error("Login Falhou", f"Usuário '{username}' não encontrado.")
-            
+            self.login_view.show_error(
+                "Login Falhou", "Usuário ou senha inválidos."
+            )
+
+    def handle_register_event(self, username, password, confirmation):
+        """Retorna (sucesso, mensagem) para a janela de cadastro."""
+        if password != confirmation:
+            return False, "As senhas não coincidem."
+        try:
+            if register_user(username, password):
+                return True, "Conta criada. Entre com seu usuário e senha."
+            return False, "Este nome de usuário já está em uso."
+        except ValueError as exc:
+            return False, str(exc)
+        except RuntimeError:
+            return False, "Não foi possível acessar o banco de dados."
+
     def show_main_view(self):
         """Cria e exibe a MainView."""
         self.main_view = MainView(self.master, self)
